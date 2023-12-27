@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Spotify Clone</string>
+    <string name="notification_channel_name">Music Channel</string>
+    <string name="notification_channel_description">Shows the currently playing music</string>
+    <!-- res/values/strings.xml -->
+
+    <string name="notification_policy_rationale">We need access to your notification policy to manage and display notifications.</string>
+
+    <string name="notification_policy_permission_request">Permission Request</string>
+
+</resources>
