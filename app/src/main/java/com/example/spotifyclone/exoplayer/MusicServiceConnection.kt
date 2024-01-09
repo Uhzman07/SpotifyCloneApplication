@@ -88,6 +88,7 @@ class MusicServiceConnection (
         // This is when it is connected
         override fun onConnected() {
             //Log.d("Check1", "Connected")
+            Log.d("MusicServiceConnection", "CONNECTED")
             // Then to create our mediaController
             mediaController = MediaControllerCompat(context, mediaBrowser.sessionToken).apply {
                 // This is to add the media controller call back to it
@@ -104,6 +105,7 @@ class MusicServiceConnection (
 
         override fun onConnectionSuspended() {
             //super.onConnectionSuspended()
+            Log.d("MusicServiceConnection", "SUSPENDED")
             _isConnected.postValue(Event(Resource.error(
                 "The connection was suspended", false
             )
@@ -111,6 +113,8 @@ class MusicServiceConnection (
         }
 
         override fun onConnectionFailed() {
+            Log.d("MusicServiceConnection", "FAILED")
+
             //super.onConnectionFailed()
             _isConnected.postValue(Event(Resource.error(
                 "Couldn't connect to media browser",
@@ -131,6 +135,7 @@ class MusicServiceConnection (
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             //super.onPlaybackStateChanged(state)
             // Then to post the value of the states
+            Log.d("playBackStateChange", state.toString())
             _playbackState.postValue(state)
         }
 
@@ -149,7 +154,7 @@ class MusicServiceConnection (
                 NETWORK_ERROR -> _networkError.postValue(
                     Event(
                         Resource.error(
-                            "Couldn't connect to the server. Please check your intenet connection.",
+                            "Couldn't connect to the server. Please check your internet connection.",
                             null
                         )
                     )

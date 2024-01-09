@@ -3,6 +3,7 @@ package com.example.spotifyclone.ui.fragments
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -22,6 +23,7 @@ import com.example.spotifyclone.other.Status
 import com.example.spotifyclone.ui.viewmodels.MainViewModel
 import com.example.spotifyclone.ui.viewmodels.SongViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
@@ -44,16 +46,28 @@ class SongFragment : Fragment(R.layout.fragment_song) {
 
     private var shouldUpdateSeekbar = true
 
+    private val dateFormatter = SimpleDateFormat("mm:ss", Locale.getDefault())
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        privView = view
+
         // Note that the View Model is bounded to the activity and not the Fragment so we have to use the requireActivity() for it
         // Then we make use of the get method to get the actual ViewModel that we want to instantiate
         mainViewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
         subscribeToObservers()
 
-        view?.findViewById<SeekBar>(R.id.seekBar)?.min = 0
+        privView = view
+
+        /*
+
+
+        privView?.findViewById<SeekBar>(R.id.seekBar)?.min = 0
+        privView?.findViewById<SeekBar>(R.id.seekBar)?.progress = 0
+
+        privView?.findViewById<TextView>(R.id.tvCurTime)?.text = "00:05"
+
+         */
 
         privView?.findViewById<ImageView>(R.id.ivPlayPauseDetail)?.setOnClickListener {
             curPlayingSong?.let {
@@ -62,11 +76,18 @@ class SongFragment : Fragment(R.layout.fragment_song) {
         }
 
         privView?.findViewById<SeekBar>(R.id.seekBar)?.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(p0: SeekBar?, progress: Int, fromUser: Boolean) {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 // We need to check if the progress change was initiated by the user him self
-                // Note that the new update has "progress" and "fromUser" as "p1" and "p2" respectively in the argument(I just changed for comprehension)
+                // Note that the new update has "seekBar", "progress" and "fromUser" as "p0", "p1" and "p2" respectively in the argument(I just changed for comprehension)
                 if(fromUser){
+                    //val time = dateFormatter.format(progress)
+                   // Log.d("Duration2", time)
                     setCurrentTimeToTextView(progress.toLong())
+                    //view?.findViewById<TextView>(R.id.tvCurTime)?.text = time
+
+
+
+
                 }
             }
 
@@ -77,10 +98,19 @@ class SongFragment : Fragment(R.layout.fragment_song) {
 
             override fun onStopTrackingTouch(p0: SeekBar?) {
                 // Then to update the seek bar when the seek bar movement is stopped or if it is actually released
-                privView?.findViewById<SeekBar>(R.id.seekBar)?.let{
+                p0?.let{
                     mainViewModel.seekTo(it.progress.toLong())
+                    //Log.d("Duration tag", it?.progress!!.toLong().toString())
+
+
+                    //val time = dateFormatter.format(it.progress)
+                    //Log.d("Duration2", time)
+                    //setCurrentTimeToTextView(progress.toLong())
                     shouldUpdateSeekbar = true
+                    //view?.findViewById<TextView>(R.id.tvCurTime)?.text = time
                 }
+
+
 
             }
 
@@ -146,13 +176,18 @@ class SongFragment : Fragment(R.layout.fragment_song) {
                 R.drawable.ic_play
                 }
             )
+            // Check this please
             view?.findViewById<SeekBar>(R.id.seekBar)?.progress = it?.position?.toInt() ?: 0
+
+
+
 
         }
 
 
         songViewModel.curPlayerPosition.observe(viewLifecycleOwner){
-            if(shouldUpdateSeekbar){
+            if(shouldUpdateSeekbar){ // Check this "shouldUpdateSeekbar"
+
                 view?.findViewById<SeekBar>(R.id.seekBar)?.progress = it.toInt()
                 setCurrentTimeToTextView(it)
             }
@@ -160,13 +195,20 @@ class SongFragment : Fragment(R.layout.fragment_song) {
 
         songViewModel.curSongDuration.observe(viewLifecycleOwner){
 
-            //view?.findViewById<SeekBar>(R.id.seekBar)?.max = it.toInt()
+            view?.findViewById<SeekBar>(R.id.seekBar)?.max = it.toInt()
+            Log.d("Main Boolean", shouldUpdateSeekbar.toString())
+            Log.d("Main Duration", it.toString())
 
-            val maxDuration = it.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-            view?.findViewById<SeekBar>(R.id.seekBar)?.max = maxDuration
+            // This is used to test the code
+
+            //var finalTime = dateFormatter.format(it)
+            //Log.d("Duration of song", finalTime)
+
+            //val maxDuration = it.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+           // view?.findViewById<SeekBar>(R.id.seekBar)?.max = maxDuration
 
             val dateFormat = SimpleDateFormat("mm:ss",  Locale.getDefault())
-            view?.findViewById<TextView>(R.id.tvCurTime)?.text = dateFormat.format(it)
+            view?.findViewById<TextView>(R.id.tvSongDuration)?.text = dateFormat.format(it)
 
         }
 
